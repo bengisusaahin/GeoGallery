@@ -3,6 +3,7 @@ package com.bengisusahin.gallery.presentation
 import android.Manifest
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -28,18 +29,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
+import androidx.exifinterface.media.ExifInterface
 import coil.compose.rememberAsyncImagePainter
+import com.bengisusahin.gallery.data.ImageLocation
+import java.io.InputStream
 
 @Composable
 fun GalleryScreen() {
     val context = LocalContext.current
-    var isPermissionGranted by remember { mutableStateOf(false) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var imageLocation by remember { mutableStateOf<ImageLocation?>(null) }
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         selectedImageUri = uri
+        uri?.let {
+            imageLocation = extractLocationFromImage(context.contentResolver.openInputStream(it))
+        }
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -96,8 +103,27 @@ fun GalleryScreen() {
                     .height(300.dp),
                 contentScale = ContentScale.Crop
             )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            imageLocation?.let { location ->
+                Text(text = "Location: Lat ${location.latitude}, Long ${location.longitude}")
+            } ?: run {
+                Text(text = "No location info available.")
+            }
         } ?: run {
             Text(text = "Select an image to view it.")
         }
     }
+}
+fun extractLocationFromImage(inputStream: InputStream?): ImageLocation? {
+    inputStream?.use {
+        val exif = ExifInterface(it)
+        val latLong = exif.latLong
+        if (latLong != null) {
+            return ImageLocation(latLong[0], latLong[1])
+        } else {
+            Log.d("GalleryScreen", "No location data found in EXIF.")
+        }
+    }
+    return null
 }
