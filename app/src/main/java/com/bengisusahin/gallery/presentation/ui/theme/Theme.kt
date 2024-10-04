@@ -1,4 +1,4 @@
-package com.bengisusahin.gallery.ui.theme
+package com.bengisusahin.gallery.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
