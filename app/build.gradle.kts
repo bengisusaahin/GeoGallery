@@ -69,4 +69,7 @@ dependencies {
 
     // Coil
     implementation(libs.coil.compose)
+
+    // ExifInterface
+    implementation(libs.androidx.exifinterface)
 }
