@@ -118,11 +118,22 @@ fun GalleryScreen() {
 fun extractLocationFromImage(inputStream: InputStream?): ImageLocation? {
     inputStream?.use {
         val exif = ExifInterface(it)
-        val latLong = exif.latLong
-        if (latLong != null) {
-            return ImageLocation(latLong[0], latLong[1])
+
+        val latitudeString = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE)
+        val latitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF)
+        val longitudeString = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE)
+        val longitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF)
+
+        val latitude = latitudeString?.toDoubleOrNull()
+        val longitude = longitudeString?.toDoubleOrNull()
+
+        if (latitude != null && longitude != null && latitudeRef != null && longitudeRef != null) {
+            val lat = if (latitudeRef == "N") latitude else -latitude
+            val lon = if (longitudeRef == "E") longitude else -longitude
+            return ImageLocation(lat, lon)
         } else {
-            Log.d("GalleryScreen", "No location data found in EXIF.")
+            Log.d("GalleryScreen", "No valid GPS data found in EXIF: " +
+                    "latitudeString=$latitudeString, longitudeString=$longitudeString")
         }
     }
     return null
