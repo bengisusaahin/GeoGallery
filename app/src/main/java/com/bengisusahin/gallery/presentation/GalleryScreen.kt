@@ -107,6 +107,9 @@ fun GalleryScreen() {
 
             imageLocation?.let { location ->
                 Text(text = "Location: Lat ${location.latitude}, Long ${location.longitude}")
+                location.dateTime?.let { date ->
+                    Text(text = "Date: $date")
+                }
             } ?: run {
                 Text(text = "No location info available.")
             }
@@ -115,26 +118,37 @@ fun GalleryScreen() {
         }
     }
 }
+fun dmsToDecimal(dms: String, ref: String): Double {
+    val parts = dms.split(",")
+    val degrees = parts[0].split("/").let { it[0].toDouble() / it[1].toDouble() }
+    val minutes = parts[1].split("/").let { it[0].toDouble() / it[1].toDouble() }
+    val seconds = parts[2].split("/").let { it[0].toDouble() / it[1].toDouble() }
+
+    val decimal = degrees + (minutes / 60) + (seconds / 3600)
+    return if (ref == "S" || ref == "W") -decimal else decimal
+}
+
 fun extractLocationFromImage(inputStream: InputStream?): ImageLocation? {
     inputStream?.use {
         val exif = ExifInterface(it)
-
         val latitudeString = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE)
         val latitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF)
         val longitudeString = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE)
         val longitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF)
+        val dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME)
 
-        val latitude = latitudeString?.toDoubleOrNull()
-        val longitude = longitudeString?.toDoubleOrNull()
+        Log.d("GalleryScreen", "latitudeString: $latitudeString, latitudeRef: $latitudeRef")
+        Log.d("GalleryScreen", "longitudeString: $longitudeString, longitudeRef: $longitudeRef")
+        Log.d("GalleryScreen", "DateTime: $dateTime")
 
-        if (latitude != null && longitude != null && latitudeRef != null && longitudeRef != null) {
-            val lat = if (latitudeRef == "N") latitude else -latitude
-            val lon = if (longitudeRef == "E") longitude else -longitude
-            return ImageLocation(lat, lon)
+        if (latitudeString != null && longitudeString != null && latitudeRef != null && longitudeRef != null) {
+            val latitude = dmsToDecimal(latitudeString, latitudeRef)
+            val longitude = dmsToDecimal(longitudeString, longitudeRef)
+            return ImageLocation(latitude, longitude, dateTime)
         } else {
-            Log.d("GalleryScreen", "No valid GPS data found in EXIF: " +
-                    "latitudeString=$latitudeString, longitudeString=$longitudeString")
+            Log.d("GalleryScreen", "No valid GPS data found in EXIF: latitudeString=$latitudeString, longitudeString=$longitudeString")
         }
     }
     return null
 }
+
