@@ -3,7 +3,6 @@ package com.bengisusahin.gallery.presentation
 import android.Manifest
 import android.net.Uri
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,13 +29,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.core.content.PermissionChecker
-import androidx.exifinterface.media.ExifInterface
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.bengisusahin.gallery.data.ImageLocation
-import java.io.InputStream
 
 @Composable
-fun GalleryScreen() {
+fun GalleryScreen(
+    viewModel: GalleryViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var imageLocation by remember { mutableStateOf<ImageLocation?>(null) }
@@ -45,7 +46,7 @@ fun GalleryScreen() {
     ) { uri: Uri? ->
         selectedImageUri = uri
         uri?.let {
-            imageLocation = extractLocationFromImage(context.contentResolver.openInputStream(it))
+            viewModel.selectImage(it)
         }
     }
 
@@ -78,6 +79,18 @@ fun GalleryScreen() {
             imagePickerLauncher.launch("image/*")
         } else {
             permissionLauncher.launch(permission)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.selectedImageUri.collect { uri ->
+            selectedImageUri = uri
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.imageLocation.collect { location ->
+            imageLocation = location
         }
     }
 
@@ -118,37 +131,3 @@ fun GalleryScreen() {
         }
     }
 }
-fun dmsToDecimal(dms: String, ref: String): Double {
-    val parts = dms.split(",")
-    val degrees = parts[0].split("/").let { it[0].toDouble() / it[1].toDouble() }
-    val minutes = parts[1].split("/").let { it[0].toDouble() / it[1].toDouble() }
-    val seconds = parts[2].split("/").let { it[0].toDouble() / it[1].toDouble() }
-
-    val decimal = degrees + (minutes / 60) + (seconds / 3600)
-    return if (ref == "S" || ref == "W") -decimal else decimal
-}
-
-fun extractLocationFromImage(inputStream: InputStream?): ImageLocation? {
-    inputStream?.use {
-        val exif = ExifInterface(it)
-        val latitudeString = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE)
-        val latitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LATITUDE_REF)
-        val longitudeString = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE)
-        val longitudeRef = exif.getAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF)
-        val dateTime = exif.getAttribute(ExifInterface.TAG_DATETIME)
-
-        Log.d("GalleryScreen", "latitudeString: $latitudeString, latitudeRef: $latitudeRef")
-        Log.d("GalleryScreen", "longitudeString: $longitudeString, longitudeRef: $longitudeRef")
-        Log.d("GalleryScreen", "DateTime: $dateTime")
-
-        if (latitudeString != null && longitudeString != null && latitudeRef != null && longitudeRef != null) {
-            val latitude = dmsToDecimal(latitudeString, latitudeRef)
-            val longitude = dmsToDecimal(longitudeString, longitudeRef)
-            return ImageLocation(latitude, longitude, dateTime)
-        } else {
-            Log.d("GalleryScreen", "No valid GPS data found in EXIF: latitudeString=$latitudeString, longitudeString=$longitudeString")
-        }
-    }
-    return null
-}
-
