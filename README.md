@@ -61,6 +61,7 @@ With GeoGallery, users can explore their images along with geographical context,
   * [Repository](https://developer.android.com/topic/architecture/data-layer) - Located in the data
       layer that contains application data and business logic.
 * [Coil (2.6.0)](https://coil-kt.github.io/coil/compose/) - An image loading library for Android backed by Kotlin Coroutines.
+* [ExifInterface (1.3.0)](https://developer.android.com/reference/androidx/exifinterface/media/ExifInterface) - Used to read and write EXIF data for images, allowing the application to display metadata such as location, date, and time associated with photos.
   
 <!-- Architecture -->
 ## Architecture
