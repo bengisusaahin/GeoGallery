@@ -7,15 +7,6 @@ GeoGallery
   <img src="https://img.shields.io/badge/Jetpack_Compose-4285f4?style=flat&logo=jetpackcompose&logoColor=white">
 </p>
 
-<div align="center">
-  
-  [![Contributors][contributors-shield]][contributors-url]
-  [![Forks][forks-shield]][forks-url]
-  [![Stargazers][stars-shield]][stars-url]
-  [![Issues][issues-shield]][issues-url]
-
-</div>
-
 GeoGallery is an application designed to allow users to select images from their device's gallery, view them, and display associated location information. This intuitive platform enhances the user experience by combining image viewing with geolocation data.
 
 
