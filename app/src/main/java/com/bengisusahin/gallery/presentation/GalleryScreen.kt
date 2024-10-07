@@ -119,7 +119,8 @@ fun GalleryScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             imageLocation?.let { location ->
-                Text(text = "Location: Lat ${location.latitude}, Long ${location.longitude}")
+                Text(text = "Location: Lat ${location.latitude}")
+                Text(text = "Location: Long ${location.longitude}")
                 location.dateTime?.let { date ->
                     Text(text = "Date: $date")
                 }
