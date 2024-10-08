@@ -8,7 +8,7 @@ GeoGallery
 </p>
 
 GeoGallery is an application designed to allow users to select images from their device's gallery, view them, and display associated location information. This intuitive platform enhances the user experience by combining image viewing with geolocation data.
-
+> **Check out the full Medium article** that dives deeper into the development process and challenges faced during the creation of GeoGallery! [Medium Article Link](https://medium.com/@bengisusaahin/dijital-an%C4%B1lar%C4%B1n%C4%B1z%C4%B1-yerinde-yakalamak-exifinterface-ve-android-ile-konum-bilgisi-kullan%C4%B1m%C4%B1-e0975c456f0f)
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
