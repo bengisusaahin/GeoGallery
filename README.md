@@ -41,6 +41,9 @@ With GeoGallery, users can explore their images along with geographical context,
 
 <!-- Demo -->
 ## Demo
+https://github.com/user-attachments/assets/08524549-4d96-43b0-8170-9e9ac718ea60
+
+
 
 ## Requirements
 - Android 7.0 (Nougat) or higher (Min SDK 24)
